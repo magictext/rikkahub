@@ -73,6 +73,7 @@ import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.File02
 import me.rerere.hugeicons.stroke.MusicNote03
 import me.rerere.hugeicons.stroke.Video01
+import me.rerere.hugeicons.stroke.Document
 import me.rerere.rikkahub.R
 import me.rerere.rikkahub.Screen
 import me.rerere.rikkahub.data.model.Assistant
@@ -542,6 +543,10 @@ private fun MessagePartsBlock(
                         }
                     }
 
+                    is UIMessagePart.Summary -> {
+                        SummaryBlock(text = part.text)
+                    }
+
                     else -> {
                         // Skip unknown part types (e.g., deprecated ToolCall, ToolResult, Search)
                     }
@@ -549,6 +554,7 @@ private fun MessagePartsBlock(
             }
         }
     }
+}
 
     // Annotations (always rendered at the end)
     if (annotations.isNotEmpty()) {
@@ -603,6 +609,50 @@ private fun MessagePartsBlock(
                 }
             ) {
                 Text(stringResource(R.string.citations_count, annotations.size))
+            }
+        }
+    }
+}
+
+@Composable
+private fun SummaryBlock(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        onClick = { expanded = !expanded }
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(
+                    imageVector = HugeIcons.Document,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = stringResource(R.string.chat_message_summary),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            AnimatedVisibility(visible = expanded) {
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
         }
     }

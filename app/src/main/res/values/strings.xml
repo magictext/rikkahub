@@ -1055,4 +1055,20 @@
   <string name="video">Video</string>
   <string name="web_search_disabled">Web search disabled</string>
   <string name="web_search_enabled">Web search enabled</string>
+  
+  <!-- Summary feature -->
+  <string name="default_summary_prompt">After each response, please provide a brief summary of this conversation round in a &lt;summary&gt; tag. Format: &lt;summary&gt;User asked about X, I answered Y&lt;/summary&gt;</string>
+  <string name="assistant_page_summary_config">Summary Compression</string>
+  <string name="assistant_page_summary_enabled">Enable Summary Compression</string>
+  <string name="assistant_page_summary_enabled_desc">Automatically generate summaries and use them to compress early conversations</string>
+  <string name="assistant_page_summary_start_round">Start Round</string>
+  <string name="assistant_page_summary_start_round_desc">Begin compression when conversation reaches this round</string>
+  <string name="assistant_page_summary_interval">Interval</string>
+  <string name="assistant_page_summary_interval_desc">Expand summary range by this amount each interval</string>
+  <string name="assistant_page_summary_prompt">Custom Summary Prompt</string>
+  <string name="assistant_page_summary_prompt_desc">Leave empty to use default prompt</string>
+  <string name="assistant_page_summary_start_round_hint">Default: 30</string>
+  <string name="assistant_page_summary_interval_hint">Default: 10</string>
+  <string name="assistant_page_summary_prompt_placeholder">Leave empty to use default prompt</string>
+  <string name="chat_message_summary">Summary</string>
 </resources>

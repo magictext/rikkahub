@@ -397,6 +397,18 @@ sealed class UIMessagePart {
         override var metadata: JsonObject? = null
     ) : UIMessagePart()
 
+    /**
+     * Summary part for automatic conversation compression.
+     * Contains a brief summary of the conversation round, used for context compression.
+     * Hidden from normal UI display, shown in a collapsible component when user wants to view.
+     */
+    @Serializable
+    @SerialName("summary")
+    data class Summary(
+        val text: String,
+        override var metadata: JsonObject? = null
+    ) : UIMessagePart()
+
     @Deprecated("Deprecated")
     @Serializable
     @SerialName("search")
@@ -497,6 +509,7 @@ fun List<UIMessagePart>.toSortedMessageParts(): List<UIMessagePart> {
     return sortedBy { part ->
         when (part) {
             is UIMessagePart.Reasoning -> -1
+            is UIMessagePart.Summary -> -1
             is UIMessagePart.Text -> 0
             is UIMessagePart.Tool -> 0
             is UIMessagePart.ToolCall -> 0
