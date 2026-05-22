@@ -270,6 +270,7 @@
   <string name="chat_page_compress_warning">⚠️ Сжатие контекста приведёт к сбросу всех сообщений в текущем диалоге</string>
   <string name="chat_page_compressing">Сжатие...</string>
   <string name="chat_page_generate_summary">Создать сводку</string>
+  <string name="chat_page_remove_summary">Удалить сводку</string>
   <string name="chat_page_batch_summary">Пакетное создание сводок</string>
   <string name="chat_page_batch_summary_desc">Создать сводки для всех сообщений без них</string>
   <string name="chat_page_generating_summary">Создание сводки...</string>

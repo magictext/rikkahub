@@ -270,6 +270,7 @@
   <string name="chat_page_compress_warning">⚠️ Compressing context will reset all messages in the current conversation</string>
   <string name="chat_page_compressing">Compressing...</string>
   <string name="chat_page_generate_summary">Generate Summary</string>
+  <string name="chat_page_remove_summary">Remove Summary</string>
   <string name="chat_page_batch_summary">Batch Generate Summaries</string>
   <string name="chat_page_batch_summary_desc">Generate summaries for all messages without one</string>
   <string name="chat_page_generating_summary">Generating summary...</string>

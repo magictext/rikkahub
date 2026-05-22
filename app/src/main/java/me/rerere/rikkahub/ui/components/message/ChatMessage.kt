@@ -115,6 +115,7 @@ fun ChatMessage(
     onTranslate: ((UIMessage, Locale) -> Unit)? = null,
     onClearTranslation: (UIMessage) -> Unit = {},
     onGenerateSummary: (() -> Unit)? = null,
+    onRemoveSummary: (() -> Unit)? = null,
     onToolApproval: ((toolCallId: String, approved: Boolean, reason: String) -> Unit)? = null,
     onToolAnswer: ((toolCallId: String, answer: String) -> Unit)? = null,
 ) {
@@ -203,7 +204,8 @@ fun ChatMessage(
                     },
                     onTranslate = onTranslate,
                     onClearTranslation = onClearTranslation,
-                    onGenerateSummary = onGenerateSummary
+                    onGenerateSummary = onGenerateSummary,
+                    onRemoveSummary = onRemoveSummary
                 )
             }
         }
@@ -240,6 +242,7 @@ fun ChatMessage(
                 }
             },
             onGenerateSummary = onGenerateSummary,
+            onRemoveSummary = onRemoveSummary,
             onDismissRequest = {
                 showActionsSheet = false
             }

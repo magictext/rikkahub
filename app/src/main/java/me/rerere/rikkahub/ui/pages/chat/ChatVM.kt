@@ -208,6 +208,12 @@ class ChatVM(
         }
     }
 
+    fun handleRemoveMessageSummary(messageId: Uuid) {
+        viewModelScope.launch {
+            chatService.removeMessageSummary(_conversationId, messageId)
+        }
+    }
+
     fun handleBatchGenerateSummaries() {
         viewModelScope.launch {
             chatService.batchGenerateSummaries(_conversationId, conversation.value)

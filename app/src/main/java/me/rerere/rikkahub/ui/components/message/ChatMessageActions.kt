@@ -74,6 +74,7 @@ fun ColumnScope.ChatMessageActionButtons(
     onTranslate: ((UIMessage, Locale) -> Unit)? = null,
     onClearTranslation: (UIMessage) -> Unit = {},
     onGenerateSummary: (() -> Unit)? = null,
+    onRemoveSummary: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     var isPendingDelete by remember { mutableStateOf(false) }
@@ -191,6 +192,24 @@ fun ColumnScope.ChatMessageActionButtons(
                     tint = actionIconColor
                 )
             }
+
+            // Remove summary button - only show if message has a summary
+            if (onRemoveSummary != null && message.parts.any { it is UIMessagePart.Summary }) {
+                Icon(
+                    imageVector = HugeIcons.Delete01,
+                    contentDescription = stringResource(R.string.chat_page_remove_summary),
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = LocalIndication.current,
+                            onClick = onRemoveSummary
+                        )
+                        .padding(8.dp)
+                        .size(16.dp),
+                    tint = actionIconColor
+                )
+            }
         }
 
         Icon(
@@ -261,6 +280,7 @@ fun ChatMessageActionsSheet(
     onToggleFavorite: (() -> Unit)? = null,
     onWebViewPreview: () -> Unit,
     onGenerateSummary: (() -> Unit)? = null,
+    onRemoveSummary: (() -> Unit)? = null,
     onDismissRequest: () -> Unit
 ) {
     ModalBottomSheet(
@@ -468,6 +488,35 @@ fun ChatMessageActionsSheet(
                         )
                         Text(
                             text = stringResource(R.string.chat_page_generate_summary),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+                }
+            }
+
+            // Remove Summary (only for messages with summary)
+            if (onRemoveSummary != null && message.parts.any { it is UIMessagePart.Summary }) {
+                Card(
+                    onClick = {
+                        onDismissRequest()
+                        onRemoveSummary()
+                    },
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Icon(
+                            imageVector = HugeIcons.Delete01,
+                            contentDescription = null,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.chat_page_remove_summary),
                             style = MaterialTheme.typography.titleMedium,
                         )
                     }

@@ -270,6 +270,7 @@
   <string name="chat_page_compress_warning">⚠️ 压缩上下文将重置当前对话中的所有消息</string>
   <string name="chat_page_compressing">正在压缩...</string>
   <string name="chat_page_generate_summary">生成摘要</string>
+  <string name="chat_page_remove_summary">删除摘要</string>
   <string name="chat_page_batch_summary">批量生成摘要</string>
   <string name="chat_page_batch_summary_desc">为所有没有摘要的消息批量生成摘要</string>
   <string name="chat_page_generating_summary">正在生成摘要...</string>

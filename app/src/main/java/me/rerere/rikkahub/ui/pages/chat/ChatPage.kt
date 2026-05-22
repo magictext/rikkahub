@@ -438,6 +438,9 @@ private fun ChatPageContent(
                 onGenerateSummary = { node ->
                     vm.handleGenerateMessageSummary(node.id)
                 },
+                onRemoveSummary = { node ->
+                    vm.handleRemoveMessageSummary(node.id)
+                },
             )
         }
     }

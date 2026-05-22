@@ -136,6 +136,7 @@ fun ChatList(
     onToggleFavorite: ((MessageNode) -> Unit)? = null,
     onConversationSystemPromptChange: ((String?) -> Unit)? = null,
     onGenerateSummary: ((MessageNode) -> Unit)? = null,
+    onRemoveSummary: ((MessageNode) -> Unit)? = null,
 ) {
     AnimatedContent(
         targetState = previewMode,
@@ -179,6 +180,7 @@ fun ChatList(
                 onToggleFavorite = onToggleFavorite,
                 onConversationSystemPromptChange = onConversationSystemPromptChange,
                 onGenerateSummary = onGenerateSummary,
+                onRemoveSummary = onRemoveSummary,
             )
         }
     }
@@ -210,6 +212,7 @@ private fun ChatListNormal(
     onToggleFavorite: ((MessageNode) -> Unit)? = null,
     onConversationSystemPromptChange: ((String?) -> Unit)? = null,
     onGenerateSummary: ((MessageNode) -> Unit)? = null,
+    onRemoveSummary: ((MessageNode) -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
     val loadingState by rememberUpdatedState(loading)
@@ -365,6 +368,7 @@ private fun ChatListNormal(
                             onTranslate = onTranslate,
                             onClearTranslation = onClearTranslation,
                             onGenerateSummary = onGenerateSummary?.let { callback -> { callback(node) } },
+                            onRemoveSummary = onRemoveSummary?.let { callback -> { callback(node) } },
                             onToolApproval = onToolApproval,
                             onToolAnswer = onToolAnswer,
                             lastMessage = index == lastMessageIndex,

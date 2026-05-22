@@ -931,6 +931,28 @@ class ChatService(
         }
     }
 
+    suspend fun removeMessageSummary(conversationId: Uuid, messageId: Uuid) {
+        runCatching {
+            val conversation = conversationRepo.getConversationById(conversationId) ?: return
+            val updatedNodes = conversation.messageNodes.map { node ->
+                if (node.messages.any { it.id == messageId }) {
+                    node.copy(
+                        messages = node.messages.map { msg ->
+                            if (msg.id == messageId) {
+                                msg.copy(parts = msg.parts.filter { it !is UIMessagePart.Summary })
+                            } else msg
+                        }
+                    )
+                } else node
+            }
+            conversationRepo.getConversationById(conversationId)?.let {
+                saveConversation(conversationId, it.copy(messageNodes = updatedNodes))
+            }
+        }.onFailure {
+            it.printStackTrace()
+        }
+    }
+
     suspend fun batchGenerateSummaries(conversationId: Uuid, conversation: Conversation) {
         runCatching {
             val settings = settingsStore.settingsFlow.first()

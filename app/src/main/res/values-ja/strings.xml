@@ -270,6 +270,7 @@
   <string name="chat_page_compress_warning">⚠️ コンテキストを圧縮すると、現在の会話のすべてのメッセージがリセットされます</string>
   <string name="chat_page_compressing">圧縮中…</string>
   <string name="chat_page_generate_summary">要約を生成</string>
+  <string name="chat_page_remove_summary">要約を削除</string>
   <string name="chat_page_batch_summary">一括要約生成</string>
   <string name="chat_page_batch_summary_desc">要約がないすべてのメッセージの要約を一括生成</string>
   <string name="chat_page_generating_summary">要約を生成中...</string>
