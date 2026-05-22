@@ -269,6 +269,10 @@
   <string name="chat_page_compress_target_tokens">目标Token大小</string>
   <string name="chat_page_compress_warning">⚠️ 压缩上下文将重置当前对话中的所有消息</string>
   <string name="chat_page_compressing">正在压缩...</string>
+  <string name="chat_page_generate_summary">生成摘要</string>
+  <string name="chat_page_batch_summary">批量生成摘要</string>
+  <string name="chat_page_batch_summary_desc">为所有没有摘要的消息批量生成摘要</string>
+  <string name="chat_page_generating_summary">正在生成摘要...</string>
   <string name="chat_page_conversation_system_prompt">对话系统提示</string>
   <string name="chat_page_conversation_system_prompt_clear">清除</string>
   <string name="chat_page_conversation_system_prompt_hint">覆盖此对话的助手系统提示</string>
@@ -329,6 +333,7 @@
   <string name="emoji_picker_search_placeholder">搜索表情符号...</string>
   <string name="emoji_picker_select_skin_tone">选择肤色</string>
   <string name="error_title_compress_conversation">对话压缩失败</string>
+  <string name="error_title_generate_summary">摘要生成失败</string>
   <string name="error_title_generate_title">自动生成标题失败</string>
   <string name="error_title_generation">消息生成失败</string>
   <string name="error_title_operation">操作失败</string>
@@ -746,6 +751,9 @@
   <string name="setting_model_page_compress_model">压缩模型</string>
   <string name="setting_model_page_compress_model_desc">用于压缩对话历史的模型</string>
   <string name="setting_model_page_compress_prompt_vars">变量：{content}、{target_tokens}、{additional_context}</string>
+  <string name="setting_model_page_summary_model">摘要模型</string>
+  <string name="setting_model_page_summary_model_desc">用于生成消息摘要的模型</string>
+  <string name="setting_model_page_summary_prompt_vars">变量：{content}</string>
   <string name="setting_model_page_ocr_model">OCR 模型</string>
   <string name="setting_model_page_ocr_model_desc">用于图像光学字符识别的模型</string>
   <string name="setting_model_page_ocr_prompt_vars">变量：图像数据：{images}</string>

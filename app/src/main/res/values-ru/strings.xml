@@ -269,6 +269,10 @@
   <string name="chat_page_compress_target_tokens">Целевой размер токенов</string>
   <string name="chat_page_compress_warning">⚠️ Сжатие контекста приведёт к сбросу всех сообщений в текущем диалоге</string>
   <string name="chat_page_compressing">Сжатие...</string>
+  <string name="chat_page_generate_summary">Создать сводку</string>
+  <string name="chat_page_batch_summary">Пакетное создание сводок</string>
+  <string name="chat_page_batch_summary_desc">Создать сводки для всех сообщений без них</string>
+  <string name="chat_page_generating_summary">Создание сводки...</string>
   <string name="chat_page_conversation_system_prompt">Системный запрос для беседы</string>
   <string name="chat_page_conversation_system_prompt_clear">Очистить</string>
   <string name="chat_page_conversation_system_prompt_hint">Переопределить системный промпт ассистента для этого разговора</string>
@@ -329,6 +333,7 @@
   <string name="emoji_picker_search_placeholder">Поиск эмодзи...</string>
   <string name="emoji_picker_select_skin_tone">Выберите тон кожи</string>
   <string name="error_title_compress_conversation">Сжатие переписки не удалось</string>
+  <string name="error_title_generate_summary">Не удалось создать сводку</string>
   <string name="error_title_generate_title">Не удалось автоматически сгенерировать заголовок</string>
   <string name="error_title_generation">Ошибка генерации сообщения</string>
   <string name="error_title_operation">Операция не выполнена</string>
@@ -739,6 +744,9 @@
   <string name="setting_model_page_compress_model">Сжать модель</string>
   <string name="setting_model_page_compress_model_desc">Модель для сжатия истории разговоров</string>
   <string name="setting_model_page_compress_prompt_vars">Переменные: {content}, {target_tokens}, {additional_context}</string>
+  <string name="setting_model_page_summary_model">Модель сводки</string>
+  <string name="setting_model_page_summary_model_desc">Модель для создания сводок сообщений</string>
+  <string name="setting_model_page_summary_prompt_vars">Переменные: {content}</string>
   <string name="setting_model_page_ocr_model">Модель OCR</string>
   <string name="setting_model_page_ocr_model_desc">Модель, используемая для оптического распознавания текста на изображениях</string>
   <string name="setting_model_page_ocr_prompt_vars">Переменные: Данные изображения: {images}</string>

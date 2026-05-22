@@ -1,5 +1,16 @@
 package me.rerere.rikkahub.data.ai.prompts
 
+internal val DEFAULT_SUMMARY_PROMPT = """
+    Please provide a brief summary of the following conversation round.
+    Format the summary concisely, covering the key points and decisions made.
+    Keep the summary in the same language as the original conversation.
+    Output the summary directly without any explanations or meta-commentary.
+
+    <content>
+    {content}
+    </content>
+""".trimIndent()
+
 internal val DEFAULT_COMPRESS_PROMPT = """
     You are a conversation compression assistant. Compress the following conversation into a concise summary.
 

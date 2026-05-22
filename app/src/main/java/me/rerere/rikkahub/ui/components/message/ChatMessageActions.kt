@@ -40,6 +40,7 @@ import me.rerere.ai.provider.Model
 import me.rerere.ai.ui.UIMessage
 import me.rerere.ai.ui.UIMessagePart
 import me.rerere.hugeicons.HugeIcons
+import me.rerere.hugeicons.stroke.File02
 import me.rerere.hugeicons.stroke.Copy01
 import me.rerere.hugeicons.stroke.Delete01
 import me.rerere.hugeicons.stroke.Edit01
@@ -72,6 +73,7 @@ fun ColumnScope.ChatMessageActionButtons(
     onOpenActionSheet: () -> Unit,
     onTranslate: ((UIMessage, Locale) -> Unit)? = null,
     onClearTranslation: (UIMessage) -> Unit = {},
+    onGenerateSummary: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     var isPendingDelete by remember { mutableStateOf(false) }
@@ -171,6 +173,24 @@ fun ColumnScope.ChatMessageActionButtons(
                     tint = actionIconColor
                 )
             }
+
+            // Summary button - only show if message doesn't have a summary yet
+            if (onGenerateSummary != null && message.parts.none { it is UIMessagePart.Summary }) {
+                Icon(
+                    imageVector = HugeIcons.File02,
+                    contentDescription = stringResource(R.string.chat_page_generate_summary),
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = LocalIndication.current,
+                            onClick = onGenerateSummary
+                        )
+                        .padding(8.dp)
+                        .size(16.dp),
+                    tint = actionIconColor
+                )
+            }
         }
 
         Icon(
@@ -240,6 +260,7 @@ fun ChatMessageActionsSheet(
     isFavorite: Boolean = false,
     onToggleFavorite: (() -> Unit)? = null,
     onWebViewPreview: () -> Unit,
+    onGenerateSummary: (() -> Unit)? = null,
     onDismissRequest: () -> Unit
 ) {
     ModalBottomSheet(
@@ -418,6 +439,35 @@ fun ChatMessageActionsSheet(
                                 if (isFavorite) R.string.chat_message_remove_favorite
                                 else R.string.chat_message_add_favorite
                             ),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+                }
+            }
+
+            // Generate Summary (only for assistant messages without summary)
+            if (onGenerateSummary != null && message.role == MessageRole.ASSISTANT && message.parts.none { it is UIMessagePart.Summary }) {
+                Card(
+                    onClick = {
+                        onDismissRequest()
+                        onGenerateSummary()
+                    },
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Icon(
+                            imageVector = HugeIcons.File02,
+                            contentDescription = null,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.chat_page_generate_summary),
                             style = MaterialTheme.typography.titleMedium,
                         )
                     }

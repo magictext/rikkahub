@@ -865,6 +865,153 @@ class ChatService(
         saveConversation(conversationId, newConversation)
     }
 
+    // ---- 生成摘要 ----
+
+    suspend fun generateMessageSummary(conversationId: Uuid, messageId: Uuid) {
+        runCatching {
+            val settings = settingsStore.settingsFlow.first()
+            val model = settings.findModelById(settings.summaryModelId) ?: return
+            val provider = model.findProvider(settings.providers) ?: return
+
+            val conversation = conversationRepo.getConversationById(conversationId) ?: return
+            val messageNode = conversation.messageNodes.find { node ->
+                node.messages.any { it.id == messageId }
+            } ?: return
+            val message = messageNode.messages.find { it.id == messageId } ?: return
+
+            // Skip if message already has a summary
+            if (message.parts.any { it is UIMessagePart.Summary }) return
+
+            val providerHandler = providerManager.getProviderByType(provider)
+            val result = providerHandler.generateText(
+                providerSetting = provider,
+                messages = listOf(
+                    UIMessage.user(
+                        prompt = settings.summaryPrompt.applyPlaceholders(
+                            "content" to message.toText()
+                        )
+                    ),
+                ),
+                params = TextGenerationParams(
+                    model = model,
+                    reasoningLevel = ReasoningLevel.OFF,
+                ),
+            )
+
+            val summaryText = result.choices[0].message?.toText()?.trim() ?: return
+            if (summaryText.isBlank()) return
+
+            // Update the message with the summary part
+            val updatedMessage = message.copy(
+                parts = message.parts + UIMessagePart.Summary(text = summaryText)
+            )
+            val updatedNodes = conversation.messageNodes.map { node ->
+                if (node.messages.any { it.id == messageId }) {
+                    node.copy(
+                        messages = node.messages.map { msg ->
+                            if (msg.id == messageId) updatedMessage else msg
+                        }
+                    )
+                } else {
+                    node
+                }
+            }
+
+            // Re-fetch to avoid stale data
+            conversationRepo.getConversationById(conversationId)?.let {
+                saveConversation(conversationId, it.copy(messageNodes = updatedNodes))
+            }
+        }.onFailure {
+            it.printStackTrace()
+            addError(
+                error = it,
+                conversationId = conversationId,
+                title = context.getString(R.string.error_title_generate_summary),
+            )
+        }
+    }
+
+    suspend fun batchGenerateSummaries(conversationId: Uuid, conversation: Conversation) {
+        runCatching {
+            val settings = settingsStore.settingsFlow.first()
+            val model = settings.findModelById(settings.summaryModelId) ?: return
+            val provider = model.findProvider(settings.providers) ?: return
+
+            val providerHandler = providerManager.getProviderByType(provider)
+
+            // Find all assistant messages without summaries
+            val messagesToSummarize = conversation.currentMessages.filter { msg ->
+                msg.role == MessageRole.ASSISTANT && msg.parts.none { it is UIMessagePart.Summary }
+            }
+
+            if (messagesToSummarize.isEmpty()) return
+
+            // Generate summaries in parallel (max 4 concurrent)
+            val results = coroutineScope {
+                messagesToSummarize
+                    .chunked(4)
+                    .flatMap { chunk ->
+                        chunk.map { message ->
+                            async {
+                                val result = providerHandler.generateText(
+                                    providerSetting = provider,
+                                    messages = listOf(
+                                        UIMessage.user(
+                                            prompt = settings.summaryPrompt.applyPlaceholders(
+                                                "content" to message.toText()
+                                            )
+                                        ),
+                                    ),
+                                    params = TextGenerationParams(
+                                        model = model,
+                                        reasoningLevel = ReasoningLevel.OFF,
+                                    ),
+                                )
+                                val summaryText = result.choices[0].message?.toText()?.trim()
+                                if (summaryText.isNullOrBlank()) null
+                                else message.id to summaryText
+                            }
+                        }.awaitAll()
+                    }
+            }
+
+            // Apply summaries to messages
+            val summaryMap = results.filterNotNull().toMap()
+            if (summaryMap.isEmpty()) return
+
+            // Re-fetch latest conversation
+            val latestConversation = conversationRepo.getConversationById(conversationId) ?: return
+            val updatedNodes = latestConversation.messageNodes.map { node ->
+                val currentMessage = node.messages[node.selectIndex]
+                val summary = summaryMap[currentMessage.id]
+                if (summary != null) {
+                    node.copy(
+                        messages = node.messages.map { msg ->
+                            if (msg.id == currentMessage.id) {
+                                msg.copy(
+                                    parts = msg.parts + UIMessagePart.Summary(text = summary)
+                                )
+                            } else {
+                                msg
+                            }
+                        }
+                    )
+                } else {
+                    node
+                }
+            }
+
+            saveConversation(conversationId, latestConversation.copy(messageNodes = updatedNodes))
+        }.onFailure {
+            it.printStackTrace()
+            addError(
+                error = it,
+                conversationId = conversationId,
+                title = context.getString(R.string.error_title_generate_summary),
+            )
+        }
+    }
+
     // ---- 通知 ----
 
     private fun sendGenerationDoneNotification(conversationId: Uuid, senderName: String) {

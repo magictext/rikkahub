@@ -269,6 +269,10 @@
   <string name="chat_page_compress_target_tokens">ターゲットトークンサイズ</string>
   <string name="chat_page_compress_warning">⚠️ コンテキストを圧縮すると、現在の会話のすべてのメッセージがリセットされます</string>
   <string name="chat_page_compressing">圧縮中…</string>
+  <string name="chat_page_generate_summary">要約を生成</string>
+  <string name="chat_page_batch_summary">一括要約生成</string>
+  <string name="chat_page_batch_summary_desc">要約がないすべてのメッセージの要約を一括生成</string>
+  <string name="chat_page_generating_summary">要約を生成中...</string>
   <string name="chat_page_conversation_system_prompt">会話システムプロンプト</string>
   <string name="chat_page_conversation_system_prompt_clear">クリア</string>
   <string name="chat_page_conversation_system_prompt_hint">この会話でアシスタントのシステムプロンプトを上書き</string>
@@ -329,6 +333,7 @@
   <string name="emoji_picker_search_placeholder">絵文字を検索...</string>
   <string name="emoji_picker_select_skin_tone">肌の色を選択</string>
   <string name="error_title_compress_conversation">会話の圧縮に失敗しました</string>
+  <string name="error_title_generate_summary">要約の生成に失敗しました</string>
   <string name="error_title_generate_title">自動タイトル生成に失敗しました</string>
   <string name="error_title_generation">メッセージ生成に失敗しました</string>
   <string name="error_title_operation">操作に失敗しました</string>
@@ -739,6 +744,9 @@
   <string name="setting_model_page_compress_model">モデルを圧縮</string>
   <string name="setting_model_page_compress_model_desc">会話履歴を圧縮するモデル</string>
   <string name="setting_model_page_compress_prompt_vars">変数: {content}, {target_tokens}, {additional_context}</string>
+  <string name="setting_model_page_summary_model">要約モデル</string>
+  <string name="setting_model_page_summary_model_desc">メッセージの要約を生成するモデル</string>
+  <string name="setting_model_page_summary_prompt_vars">変数: {content}</string>
   <string name="setting_model_page_ocr_model">OCRモデル</string>
   <string name="setting_model_page_ocr_model_desc">画像の光学文字認識に使用されるモデル</string>
   <string name="setting_model_page_ocr_prompt_vars">変数: 画像データ: {images}</string>

@@ -269,6 +269,10 @@
   <string name="chat_page_compress_target_tokens">Target Token Size</string>
   <string name="chat_page_compress_warning">⚠️ Compressing context will reset all messages in the current conversation</string>
   <string name="chat_page_compressing">Compressing...</string>
+  <string name="chat_page_generate_summary">Generate Summary</string>
+  <string name="chat_page_batch_summary">Batch Generate Summaries</string>
+  <string name="chat_page_batch_summary_desc">Generate summaries for all messages without one</string>
+  <string name="chat_page_generating_summary">Generating summary...</string>
   <string name="chat_page_conversation_system_prompt">Conversation System Prompt</string>
   <string name="chat_page_conversation_system_prompt_clear">Clear</string>
   <string name="chat_page_conversation_system_prompt_hint">Override the assistant\'s system prompt for this conversation</string>
@@ -329,6 +333,7 @@
   <string name="emoji_picker_search_placeholder">Search emojis...</string>
   <string name="emoji_picker_select_skin_tone">Select Skin Tone</string>
   <string name="error_title_compress_conversation">Conversation compression failed</string>
+  <string name="error_title_generate_summary">Summary generation failed</string>
   <string name="error_title_generate_title">Auto title generation failed</string>
   <string name="error_title_generation">Message generation failed</string>
   <string name="error_title_operation">Operation failed</string>
@@ -746,6 +751,9 @@
   <string name="setting_model_page_compress_model">Compress Model</string>
   <string name="setting_model_page_compress_model_desc">Model for compressing conversation history</string>
   <string name="setting_model_page_compress_prompt_vars">Variables: {content}, {target_tokens}, {additional_context}</string>
+  <string name="setting_model_page_summary_model">Summary Model</string>
+  <string name="setting_model_page_summary_model_desc">Model for generating message summaries</string>
+  <string name="setting_model_page_summary_prompt_vars">Variables: {content}</string>
   <string name="setting_model_page_ocr_model">OCR Model</string>
   <string name="setting_model_page_ocr_model_desc">Model used for optical character recognition on images</string>
   <string name="setting_model_page_ocr_prompt_vars">Variables: Image data: {images}</string>

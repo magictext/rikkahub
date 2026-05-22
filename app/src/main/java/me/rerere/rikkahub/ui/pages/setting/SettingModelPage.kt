@@ -4,6 +4,7 @@ import me.rerere.ai.core.ReasoningLevel
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Earth
 import me.rerere.hugeicons.stroke.View
+import me.rerere.hugeicons.stroke.File02
 import me.rerere.hugeicons.stroke.FileZip
 import me.rerere.hugeicons.stroke.Mortarboard01
 import me.rerere.hugeicons.stroke.Message01
@@ -56,6 +57,7 @@ import me.rerere.rikkahub.R
 import me.rerere.rikkahub.data.ai.prompts.DEFAULT_COMPRESS_PROMPT
 import me.rerere.rikkahub.data.ai.prompts.DEFAULT_OCR_PROMPT
 import me.rerere.rikkahub.data.ai.prompts.DEFAULT_SUGGESTION_PROMPT
+import me.rerere.rikkahub.data.ai.prompts.DEFAULT_SUMMARY_PROMPT
 import me.rerere.rikkahub.data.ai.prompts.DEFAULT_TITLE_PROMPT
 import me.rerere.rikkahub.data.ai.prompts.DEFAULT_TRANSLATION_PROMPT
 import me.rerere.rikkahub.ui.components.ai.ReasoningButton
@@ -115,6 +117,10 @@ fun SettingModelPage(vm: SettingVM = koinViewModel()) {
 
             item {
                 DefaultCompressModelSetting(settings = settings, vm = vm)
+            }
+
+            item {
+                DefaultSummaryModelSetting(settings = settings, vm = vm)
             }
         }
     }
@@ -635,6 +641,102 @@ private fun DefaultCompressModelSetting(
                             vm.updateSettings(
                                 settings.copy(
                                     compressPrompt = DEFAULT_COMPRESS_PROMPT
+                                )
+                            )
+                        }
+                    ) {
+                        Text(stringResource(R.string.setting_model_page_reset_to_default))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DefaultSummaryModelSetting(
+    settings: Settings,
+    vm: SettingVM
+) {
+    var showModal by remember { mutableStateOf(false) }
+    ModelFeatureCard(
+        title = {
+            Text(
+                stringResource(R.string.setting_model_page_summary_model),
+                maxLines = 1
+            )
+        },
+        description = {
+            Text(stringResource(R.string.setting_model_page_summary_model_desc))
+        },
+        icon = {
+            Icon(HugeIcons.File02, null)
+        },
+        actions = {
+            Box(modifier = Modifier.weight(1f)) {
+                ModelSelector(
+                    modelId = settings.summaryModelId,
+                    type = ModelType.CHAT,
+                    onSelect = {
+                        vm.updateSettings(
+                            settings.copy(
+                                summaryModelId = it.id
+                            )
+                        )
+                    },
+                    providers = settings.providers,
+                    modifier = Modifier.wrapContentWidth()
+                )
+            }
+            IconButton(
+                onClick = {
+                    showModal = true
+                },
+                colors = IconButtonDefaults.filledTonalIconButtonColors()
+            ) {
+                Icon(HugeIcons.Tools, null)
+            }
+        }
+    )
+
+    if (showModal) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showModal = false
+            },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                FormItem(
+                    label = {
+                        Text(stringResource(R.string.setting_model_page_prompt))
+                    },
+                    description = {
+                        Text(stringResource(R.string.setting_model_page_summary_prompt_vars))
+                    }
+                ) {
+                    OutlinedTextField(
+                        value = settings.summaryPrompt,
+                        onValueChange = {
+                            vm.updateSettings(
+                                settings.copy(
+                                    summaryPrompt = it
+                                )
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLines = 10,
+                    )
+                    TextButton(
+                        onClick = {
+                            vm.updateSettings(
+                                settings.copy(
+                                    summaryPrompt = DEFAULT_SUMMARY_PROMPT
                                 )
                             )
                         }

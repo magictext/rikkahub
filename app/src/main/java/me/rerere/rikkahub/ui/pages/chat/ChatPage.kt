@@ -354,6 +354,9 @@ private fun ChatPageContent(
                     onCompressContext = { additionalPrompt, targetTokens, keepRecentMessages ->
                         vm.handleCompressContext(additionalPrompt, targetTokens, keepRecentMessages)
                     },
+                    onBatchSummary = {
+                        vm.handleBatchGenerateSummaries()
+                    },
                 )
             },
             containerColor = Color.Transparent,
@@ -431,6 +434,9 @@ private fun ChatPageContent(
                 onConversationSystemPromptChange = { newPrompt ->
                     vm.updateConversation(conversation.copy(customSystemPrompt = newPrompt))
                     vm.saveConversationAsync()
+                },
+                onGenerateSummary = { node ->
+                    vm.handleGenerateMessageSummary(node.id)
                 },
             )
         }

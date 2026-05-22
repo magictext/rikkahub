@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 import me.rerere.ai.provider.ProviderSetting
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Camera01
+import me.rerere.hugeicons.stroke.File02
 import me.rerere.hugeicons.stroke.Files02
 import me.rerere.hugeicons.stroke.Image02
 import me.rerere.hugeicons.stroke.MusicNote03
@@ -71,6 +72,7 @@ internal fun FilesPicker(
     state: ChatInputState,
     mcpManager: McpManager,
     onCompressContext: (additionalPrompt: String, targetTokens: Int, keepRecentMessages: Int) -> Job,
+    onBatchSummary: (() -> Unit)? = null,
     onUpdateAssistant: (Assistant) -> Unit,
     onUpdateConversation: (Conversation) -> Unit,
     showInjectionSheet: Boolean,
@@ -186,6 +188,39 @@ internal fun FilesPicker(
                     onShowCompressDialogChange(true)
                 },
         )
+
+        // Batch Generate Summaries Button
+        if (onBatchSummary != null) {
+            val messagesWithoutSummary = conversation.currentMessages.count { msg ->
+                msg.role == me.rerere.ai.core.MessageRole.ASSISTANT && msg.parts.none { it is me.rerere.ai.ui.UIMessagePart.Summary }
+            }
+            ListItem(
+                leadingContent = {
+                    Icon(
+                        imageVector = HugeIcons.File02,
+                        contentDescription = stringResource(R.string.chat_page_batch_summary),
+                    )
+                },
+                headlineContent = {
+                    Text(stringResource(R.string.chat_page_batch_summary))
+                },
+                trailingContent = {
+                    if (messagesWithoutSummary > 0) {
+                        Text(
+                            text = messagesWithoutSummary.toString(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                },
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.large)
+                    .clickable {
+                        onBatchSummary()
+                        onDismiss()
+                    },
+            )
+        }
     }
 
     // Injection Bottom Sheet

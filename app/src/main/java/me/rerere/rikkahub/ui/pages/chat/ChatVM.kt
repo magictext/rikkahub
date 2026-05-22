@@ -202,6 +202,18 @@ class ChatVM(
         }
     }
 
+    fun handleGenerateMessageSummary(messageId: Uuid) {
+        viewModelScope.launch {
+            chatService.generateMessageSummary(_conversationId, messageId)
+        }
+    }
+
+    fun handleBatchGenerateSummaries() {
+        viewModelScope.launch {
+            chatService.batchGenerateSummaries(_conversationId, conversation.value)
+        }
+    }
+
     suspend fun forkMessage(message: UIMessage): Conversation {
         return chatService.forkConversationAtMessage(_conversationId, message.id)
     }
