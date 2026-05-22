@@ -44,6 +44,7 @@ data class Assistant(
     val enableTimeReminder: Boolean = false,            // 时间间隔提醒注入
     val allowConversationSystemPrompt: Boolean = false, // 允许对话单独重写 system prompt
     val allowConversationPromptInjection: Boolean = false, // 允许对话单独绑定提示词注入
+    val summaryConfig: SummaryConfig = SummaryConfig(), // 自动摘要配置
 )
 
 @Serializable
@@ -57,6 +58,19 @@ data class QuickMessage(
 data class AssistantMemory(
     val id: Int,
     val content: String = "",
+)
+
+/**
+ * Configuration for automatic conversation summary compression.
+ * When enabled, the assistant will generate summaries for each round and use them
+ * to compress early conversations when reaching the threshold.
+ */
+@Serializable
+data class SummaryConfig(
+    val enabled: Boolean = false,           // 总开关，默认关闭
+    val startRound: Int = 30,               // 起始轮数，达到此轮次后开始压缩
+    val interval: Int = 10,                 // 间隔，每增加此轮次扩展一次摘要范围
+    val summaryPrompt: String = "",         // 自定义摘要提示词，空则使用默认
 )
 
 @Serializable

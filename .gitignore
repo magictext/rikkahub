@@ -11,3 +11,6 @@ local.properties
 .cursor
 .history
 .kotlin
+SUMMARY_FEATURE.md
+.claude/settings.local.json
+.claude/settings.local.json

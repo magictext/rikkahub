@@ -377,6 +377,12 @@ class GenerationHandler(
                     appendLine()
                     append(tool.systemPrompt(model, messages))
                 }
+
+                // 摘要提示词注入
+                if (assistant.summaryConfig.enabled && shouldInjectSummaryPrompt(messages)) {
+                    appendLine()
+                    append(buildSummaryPrompt(assistant.summaryConfig.summaryPrompt, context))
+                }
             }
             if (system.isNotBlank()) add(UIMessage.system(prompt = system))
             addAll(messages.limitContext(assistant.contextMessageSize))
@@ -535,4 +541,26 @@ class GenerationHandler(
             }
         }
     }.flowOn(Dispatchers.IO)
+    
+    /**
+     * Check if summary prompt should be injected.
+     * Skip injection if the last message contains Tool parts.
+     */
+    private fun shouldInjectSummaryPrompt(messages: List<UIMessage>): Boolean {
+        val lastMessage = messages.lastOrNull() ?: return true
+        return !lastMessage.hasPart<UIMessagePart.Tool>()
+    }
+    
+    /**
+     * Build summary generation prompt.
+     * Uses custom prompt if provided, otherwise uses default.
+     */
+    private fun buildSummaryPrompt(customPrompt: String, context: Context): String {
+        if (customPrompt.isNotBlank()) {
+            return customPrompt
+        }
+        
+        // Use default prompt from resources
+        return context.getString(me.rerere.rikkahub.R.string.default_summary_prompt)
+    }
 }

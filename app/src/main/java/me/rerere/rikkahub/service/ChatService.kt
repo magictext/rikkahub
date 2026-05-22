@@ -64,6 +64,8 @@ import me.rerere.rikkahub.data.ai.transformers.OcrTransformer
 import me.rerere.rikkahub.data.ai.transformers.PlaceholderTransformer
 import me.rerere.rikkahub.data.ai.transformers.PromptInjectionTransformer
 import me.rerere.rikkahub.data.ai.transformers.RegexOutputTransformer
+import me.rerere.rikkahub.data.ai.transformers.SummaryContextBuilder
+import me.rerere.rikkahub.data.ai.transformers.SummaryExtractor
 import me.rerere.rikkahub.data.ai.transformers.TemplateTransformer
 import me.rerere.rikkahub.data.ai.transformers.ThinkTagTransformer
 import me.rerere.rikkahub.data.ai.transformers.TimeReminderTransformer
@@ -113,12 +115,14 @@ private val inputTransformers by lazy {
         PlaceholderTransformer,
         DocumentAsPromptTransformer,
         OcrTransformer,
+        SummaryContextBuilder,
     )
 }
 
 private val outputTransformers by lazy {
     listOf(
         ThinkTagTransformer,
+        SummaryExtractor,
         Base64ImageToLocalFileTransformer,
         RegexOutputTransformer,
     )

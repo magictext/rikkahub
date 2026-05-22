@@ -40,6 +40,11 @@ class RequestLoggingInterceptor : Interceptor {
 
         val durationMs = System.currentTimeMillis() - startTime
         val responseHeaders = response.headers.toMap()
+        val responseBody = response.body?.let { body ->
+            val source = body.source()
+            source.request(Long.MAX_VALUE)
+            source.buffer.clone().readUtf8()
+        }
 
         Logging.logRequest(
             LogEntry.RequestLog(
@@ -50,6 +55,7 @@ class RequestLoggingInterceptor : Interceptor {
                 requestBody = requestBody,
                 responseCode = response.code,
                 responseHeaders = responseHeaders,
+                responseBody = responseBody,
                 durationMs = durationMs,
                 error = error
             )

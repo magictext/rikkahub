@@ -7,6 +7,12 @@
 使用 Android Studio 或命令行 Gradle：
 
 ```bash
+# 初始化 git submodules（首次构建必需）
+git submodule update --init --recursive
+
+# 安装 web-ui 依赖（首次构建必需）
+cd web-ui && pnpm install && cd ..
+
 ./gradlew assembleDebug          # 构建 Debug APK
 ./gradlew test                   # 运行所有模块的 JVM 单元测试
 ./gradlew connectedDebugAndroidTest  # 运行设备/模拟器上的仪器测试

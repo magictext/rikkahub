@@ -1073,6 +1073,22 @@ mDNSアドレス: .localホスト名を使用し、IPを知らなくても同じ
   <string name="video">動画</string>
   <string name="web_search_disabled">ウェブ検索が無効になりました</string>
   <string name="web_search_enabled">ウェブ検索が有効になりました</string>
+
+  <!-- Summary feature -->
+  <string name="default_summary_prompt">各応答後、&lt;summary&gt;タグでこの会話ラウンドの要点を簡潔にまとめてください。形式：&lt;summary&gt;ユーザーがXについて質問、Yと回答&lt;/summary&gt;</string>
+  <string name="assistant_page_summary_config">サマリー圧縮</string>
+  <string name="assistant_page_summary_enabled">サマリー圧縮を有効にする</string>
+  <string name="assistant_page_summary_enabled_desc">サマリーを自動生成し、以前の会話を圧縮するために使用します</string>
+  <string name="assistant_page_summary_start_round">開始ラウンド</string>
+  <string name="assistant_page_summary_start_round_desc">会話がこのラウンドに達したら圧縮を開始します</string>
+  <string name="assistant_page_summary_interval">間隔</string>
+  <string name="assistant_page_summary_interval_desc">このラウンドごとにサマリー範囲を拡張します</string>
+  <string name="assistant_page_summary_prompt">カスタムサマリープロンプト</string>
+  <string name="assistant_page_summary_prompt_desc">空の場合はデフォルトのプロンプトを使用します</string>
+  <string name="assistant_page_summary_start_round_hint">デフォルト：30</string>
+  <string name="assistant_page_summary_interval_hint">デフォルト：10</string>
+  <string name="assistant_page_summary_prompt_placeholder">空の場合はデフォルトのプロンプトを使用します</string>
+  <string name="chat_message_summary">サマリー</string>
   <string name="setting_theme_page_import_theme">インポート</string>
   <string name="setting_theme_page_export_success">テーマJSONがクリップボードにコピーされました</string>
   <string name="setting_theme_page_import_success">テーマが正常にインポートされました</string>

@@ -4,6 +4,7 @@ import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.PencilEdit01
 import me.rerere.hugeicons.stroke.Add01
 import me.rerere.hugeicons.stroke.Delete01
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,15 +14,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -37,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
@@ -44,8 +50,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.rerere.rikkahub.R
 import me.rerere.rikkahub.data.model.Assistant
 import me.rerere.rikkahub.data.model.AssistantMemory
+import me.rerere.rikkahub.data.model.SummaryConfig
 import me.rerere.rikkahub.ui.components.nav.BackButton
 import me.rerere.rikkahub.ui.components.ui.CardGroup
+import me.rerere.rikkahub.ui.components.ui.FormItem
 import me.rerere.rikkahub.ui.components.ui.RikkaConfirmDialog
 import me.rerere.rikkahub.ui.hooks.EditStateContent
 import me.rerere.rikkahub.ui.hooks.useEditState
@@ -246,6 +254,14 @@ private fun AssistantMemoryContent(
             )
         }
 
+        // Summary Config Section
+        SummaryConfigSection(
+            config = assistant.summaryConfig,
+            onUpdate = { config ->
+                onUpdateAssistant(assistant.copy(summaryConfig = config))
+            }
+        )
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -305,6 +321,125 @@ private fun AssistantMemoryContent(
             )
         }
     )
+}
+
+@Composable
+private fun SummaryConfigSection(
+    config: SummaryConfig,
+    onUpdate: (SummaryConfig) -> Unit
+) {
+    Card(
+        colors = CustomColors.cardColorsOnSurfaceContainer
+    ) {
+        FormItem(
+            modifier = Modifier.padding(8.dp),
+            label = {
+                Text(stringResource(R.string.assistant_page_summary_enabled))
+            },
+            description = {
+                Text(stringResource(R.string.assistant_page_summary_enabled_desc))
+            },
+            tail = {
+                Switch(
+                    checked = config.enabled,
+                    onCheckedChange = {
+                        onUpdate(config.copy(enabled = it))
+                    }
+                )
+            }
+        )
+
+        AnimatedVisibility(visible = config.enabled) {
+            Column {
+                HorizontalDivider()
+
+                FormItem(
+                    modifier = Modifier.padding(8.dp),
+                    label = {
+                        Text(stringResource(R.string.assistant_page_summary_start_round))
+                    },
+                    description = {
+                        Text(stringResource(R.string.assistant_page_summary_start_round_desc))
+                    }
+                ) {
+                    var startRoundInput by remember(config) {
+                        mutableStateOf(config.startRound.toString())
+                    }
+                    OutlinedTextField(
+                        value = startRoundInput,
+                        onValueChange = { value ->
+                            startRoundInput = value
+                            value.toIntOrNull()?.takeIf { it > 0 }?.let {
+                                onUpdate(config.copy(startRound = it))
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        supportingText = {
+                            Text(stringResource(R.string.assistant_page_summary_start_round_hint))
+                        }
+                    )
+                }
+
+                HorizontalDivider()
+
+                FormItem(
+                    modifier = Modifier.padding(8.dp),
+                    label = {
+                        Text(stringResource(R.string.assistant_page_summary_interval))
+                    },
+                    description = {
+                        Text(stringResource(R.string.assistant_page_summary_interval_desc))
+                    }
+                ) {
+                    var intervalInput by remember(config) {
+                        mutableStateOf(config.interval.toString())
+                    }
+                    OutlinedTextField(
+                        value = intervalInput,
+                        onValueChange = { value ->
+                            intervalInput = value
+                            value.toIntOrNull()?.takeIf { it > 0 }?.let {
+                                onUpdate(config.copy(interval = it))
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        supportingText = {
+                            Text(stringResource(R.string.assistant_page_summary_interval_hint))
+                        }
+                    )
+                }
+
+                HorizontalDivider()
+
+                FormItem(
+                    modifier = Modifier.padding(8.dp),
+                    label = {
+                        Text(stringResource(R.string.assistant_page_summary_prompt))
+                    },
+                    description = {
+                        Text(stringResource(R.string.assistant_page_summary_prompt_desc))
+                    }
+                ) {
+                    OutlinedTextField(
+                        value = config.summaryPrompt,
+                        onValueChange = {
+                            onUpdate(config.copy(summaryPrompt = it))
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 3,
+                        maxLines = 6,
+                        placeholder = {
+                            Text(stringResource(R.string.assistant_page_summary_prompt_placeholder))
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
