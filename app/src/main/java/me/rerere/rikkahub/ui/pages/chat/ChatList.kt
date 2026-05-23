@@ -107,6 +107,7 @@ import kotlin.uuid.Uuid
 
 private const val TAG = "ChatList"
 private const val LoadingIndicatorKey = "LoadingIndicator"
+private const val ProcessingStatusKey = "ProcessingStatus"
 private const val ScrollBottomKey = "ScrollBottomKey"
 
 @Composable
@@ -405,6 +406,26 @@ private fun ChatListNormal(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
+                    }
+                }
+            }
+
+            // 独立的进度显示（用于批量摘要等操作）
+            if (!loading && processingStatus != null) {
+                item(ProcessingStatusKey) {
+                    Row(
+                        modifier = Modifier.padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        RabbitLoadingIndicator(
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Text(
+                            text = processingStatus ?: "",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }

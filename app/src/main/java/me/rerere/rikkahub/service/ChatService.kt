@@ -16,6 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,8 +36,11 @@ import kotlinx.serialization.json.jsonObject
 import me.rerere.ai.core.MessageRole
 import me.rerere.ai.core.ReasoningLevel
 import me.rerere.ai.core.Tool
+import me.rerere.ai.provider.Model
 import me.rerere.ai.provider.ModelAbility
+import me.rerere.ai.provider.Provider
 import me.rerere.ai.provider.ProviderManager
+import me.rerere.ai.provider.ProviderSetting
 import me.rerere.ai.provider.TextGenerationParams
 import me.rerere.ai.ui.ToolApprovalState
 import me.rerere.ai.ui.UIMessage
@@ -69,6 +73,7 @@ import me.rerere.rikkahub.data.ai.transformers.SummaryExtractor
 import me.rerere.rikkahub.data.ai.transformers.TemplateTransformer
 import me.rerere.rikkahub.data.ai.transformers.ThinkTagTransformer
 import me.rerere.rikkahub.data.ai.transformers.TimeReminderTransformer
+import me.rerere.rikkahub.data.datastore.Settings
 import me.rerere.rikkahub.data.datastore.SettingsStore
 import me.rerere.rikkahub.data.datastore.findModelById
 import me.rerere.rikkahub.data.datastore.findProvider
@@ -867,67 +872,70 @@ class ChatService(
 
     // ---- 生成摘要 ----
 
-    suspend fun generateMessageSummary(conversationId: Uuid, messageId: Uuid) {
-        runCatching {
-            val settings = settingsStore.settingsFlow.first()
-            val model = settings.findModelById(settings.summaryModelId) ?: return
-            val provider = model.findProvider(settings.providers) ?: return
+    fun generateMessageSummary(conversationId: Uuid, messageId: Uuid) {
+        launchWithConversationReference(conversationId) {
+            runCatching {
+                val settings = settingsStore.settingsFlow.first()
+                val model = settings.findModelById(settings.summaryModelId) ?: return@launchWithConversationReference
+                val provider = model.findProvider(settings.providers) ?: return@launchWithConversationReference
 
-            val conversation = conversationRepo.getConversationById(conversationId) ?: return
-            val messageNode = conversation.messageNodes.find { node ->
-                node.messages.any { it.id == messageId }
-            } ?: return
-            val message = messageNode.messages.find { it.id == messageId } ?: return
+                val conversation = conversationRepo.getConversationById(conversationId) ?: return@launchWithConversationReference
+                val messageNode = conversation.messageNodes.find { node ->
+                    node.messages.any { it.id == messageId }
+                } ?: return@launchWithConversationReference
+                val message = messageNode.messages.find { it.id == messageId } ?: return@launchWithConversationReference
 
-            // Skip if message already has a summary
-            if (message.parts.any { it is UIMessagePart.Summary }) return
+                // Skip if message already has a summary
+                if (message.parts.any { it is UIMessagePart.Summary }) return@launchWithConversationReference
 
-            val providerHandler = providerManager.getProviderByType(provider)
-            val result = providerHandler.generateText(
-                providerSetting = provider,
-                messages = listOf(
-                    UIMessage.user(
-                        prompt = settings.summaryPrompt.applyPlaceholders(
-                            "content" to message.toText()
-                        )
+                val providerHandler = providerManager.getProviderByType(provider)
+                val result = providerHandler.generateText(
+                    providerSetting = provider,
+                    messages = listOf(
+                        UIMessage.user(
+                            prompt = settings.summaryPrompt.applyPlaceholders(
+                                "content" to message.toText()
+                            )
+                        ),
                     ),
-                ),
-                params = TextGenerationParams(
-                    model = model,
-                    reasoningLevel = ReasoningLevel.OFF,
-                ),
-            )
+                    params = TextGenerationParams(
+                        model = model,
+                        reasoningLevel = ReasoningLevel.OFF,
+                    ),
+                )
 
-            val summaryText = result.choices[0].message?.toText()?.trim() ?: return
-            if (summaryText.isBlank()) return
+                val summaryText = result.choices[0].message?.toText()?.trim() ?: return@launchWithConversationReference
+                if (summaryText.isBlank()) return@launchWithConversationReference
 
-            // Update the message with the summary part
-            val updatedMessage = message.copy(
-                parts = message.parts + UIMessagePart.Summary(text = summaryText)
-            )
-            val updatedNodes = conversation.messageNodes.map { node ->
-                if (node.messages.any { it.id == messageId }) {
-                    node.copy(
-                        messages = node.messages.map { msg ->
-                            if (msg.id == messageId) updatedMessage else msg
-                        }
-                    )
-                } else {
-                    node
+                // Update the message with the summary part
+                val updatedMessage = message.copy(
+                    parts = message.parts + UIMessagePart.Summary(text = summaryText)
+                )
+                val updatedNodes = conversation.messageNodes.map { node ->
+                    if (node.messages.any { it.id == messageId }) {
+                        node.copy(
+                            messages = node.messages.map { msg ->
+                                if (msg.id == messageId) updatedMessage else msg
+                            }
+                        )
+                    } else {
+                        node
+                    }
                 }
-            }
 
-            // Re-fetch to avoid stale data
-            conversationRepo.getConversationById(conversationId)?.let {
-                saveConversation(conversationId, it.copy(messageNodes = updatedNodes))
+                // Re-fetch to avoid stale data
+                conversationRepo.getConversationById(conversationId)?.let {
+                    saveConversation(conversationId, it.copy(messageNodes = updatedNodes))
+                }
+            }.onFailure {
+                if (it is CancellationException) throw it
+                it.printStackTrace()
+                addError(
+                    error = it,
+                    conversationId = conversationId,
+                    title = context.getString(R.string.error_title_generate_summary),
+                )
             }
-        }.onFailure {
-            it.printStackTrace()
-            addError(
-                error = it,
-                conversationId = conversationId,
-                title = context.getString(R.string.error_title_generate_summary),
-            )
         }
     }
 
@@ -953,85 +961,131 @@ class ChatService(
         }
     }
 
-    suspend fun batchGenerateSummaries(conversationId: Uuid, conversation: Conversation) {
-        runCatching {
-            val settings = settingsStore.settingsFlow.first()
-            val model = settings.findModelById(settings.summaryModelId) ?: return
-            val provider = model.findProvider(settings.providers) ?: return
+    fun batchGenerateSummaries(conversationId: Uuid, conversation: Conversation) {
+        launchWithConversationReference(conversationId) {
+            val session = sessions[conversationId] ?: return@launchWithConversationReference
+            runCatching {
+                val settings = settingsStore.settingsFlow.first()
+                val model = settings.findModelById(settings.summaryModelId) ?: return@launchWithConversationReference
+                val provider = model.findProvider(settings.providers) ?: return@launchWithConversationReference
 
-            val providerHandler = providerManager.getProviderByType(provider)
+                val providerHandler = providerManager.getProviderByType(provider)
 
-            // Find all assistant messages without summaries
-            val messagesToSummarize = conversation.currentMessages.filter { msg ->
-                msg.role == MessageRole.ASSISTANT && msg.parts.none { it is UIMessagePart.Summary }
-            }
+                // Find all assistant messages without summaries
+                val messagesToSummarize = conversation.currentMessages.filter { msg ->
+                    msg.role == MessageRole.ASSISTANT && msg.parts.none { it is UIMessagePart.Summary }
+                }
 
-            if (messagesToSummarize.isEmpty()) return
+                if (messagesToSummarize.isEmpty()) return@launchWithConversationReference
 
-            // Generate summaries in parallel (max 4 concurrent)
-            val results = coroutineScope {
-                messagesToSummarize
-                    .chunked(4)
-                    .flatMap { chunk ->
-                        chunk.map { message ->
-                            async {
-                                val result = providerHandler.generateText(
-                                    providerSetting = provider,
-                                    messages = listOf(
-                                        UIMessage.user(
-                                            prompt = settings.summaryPrompt.applyPlaceholders(
-                                                "content" to message.toText()
-                                            )
-                                        ),
-                                    ),
-                                    params = TextGenerationParams(
-                                        model = model,
-                                        reasoningLevel = ReasoningLevel.OFF,
-                                    ),
-                                )
-                                val summaryText = result.choices[0].message?.toText()?.trim()
-                                if (summaryText.isNullOrBlank()) null
-                                else message.id to summaryText
-                            }
-                        }.awaitAll()
-                    }
-            }
+                val total = messagesToSummarize.size
+                val completed = java.util.concurrent.atomic.AtomicInteger(0)
 
-            // Apply summaries to messages
-            val summaryMap = results.filterNotNull().toMap()
-            if (summaryMap.isEmpty()) return
+                // 更新进度
+                session.processingStatus.value = "正在生成摘要 (0/$total)"
 
-            // Re-fetch latest conversation
-            val latestConversation = conversationRepo.getConversationById(conversationId) ?: return
-            val updatedNodes = latestConversation.messageNodes.map { node ->
-                val currentMessage = node.messages[node.selectIndex]
-                val summary = summaryMap[currentMessage.id]
-                if (summary != null) {
-                    node.copy(
-                        messages = node.messages.map { msg ->
-                            if (msg.id == currentMessage.id) {
-                                msg.copy(
-                                    parts = msg.parts + UIMessagePart.Summary(text = summary)
-                                )
-                            } else {
-                                msg
-                            }
+                // Generate summaries in parallel (max 4 concurrent)
+                val results = coroutineScope {
+                    messagesToSummarize
+                        .chunked(4)
+                        .flatMap { chunk ->
+                            chunk.map { message ->
+                                async {
+                                    val result = generateSummaryWithRetry(
+                                        providerHandler, provider, model, settings, message
+                                    )
+                                    // 更新进度
+                                    val count = completed.incrementAndGet()
+                                    session.processingStatus.value = "正在生成摘要 ($count/$total)"
+                                    result
+                                }
+                            }.awaitAll()
                         }
-                    )
+                }
+
+                // 清除进度
+                session.processingStatus.value = null
+
+                // Apply summaries to messages
+                val summaryMap = results.filterNotNull().toMap()
+                if (summaryMap.isEmpty()) return@launchWithConversationReference
+
+                // Re-fetch latest conversation
+                val latestConversation = conversationRepo.getConversationById(conversationId) ?: return@launchWithConversationReference
+                val updatedNodes = latestConversation.messageNodes.map { node ->
+                    val currentMessage = node.messages[node.selectIndex]
+                    val summary = summaryMap[currentMessage.id]
+                    if (summary != null) {
+                        node.copy(
+                            messages = node.messages.map { msg ->
+                                if (msg.id == currentMessage.id) {
+                                    msg.copy(
+                                        parts = msg.parts + UIMessagePart.Summary(text = summary)
+                                    )
+                                } else {
+                                    msg
+                                }
+                            }
+                        )
+                    } else {
+                        node
+                    }
+                }
+
+                saveConversation(conversationId, latestConversation.copy(messageNodes = updatedNodes))
+            }.onFailure {
+                session.processingStatus.value = null
+                if (it is CancellationException) throw it
+                it.printStackTrace()
+                addError(
+                    error = it,
+                    conversationId = conversationId,
+                    title = context.getString(R.string.error_title_generate_summary),
+                )
+            }
+        }
+    }
+
+    private suspend fun generateSummaryWithRetry(
+        providerHandler: Provider<ProviderSetting>,
+        provider: ProviderSetting,
+        model: Model,
+        settings: Settings,
+        message: UIMessage,
+        maxRetries: Int = 3
+    ): Pair<Uuid, String>? {
+        repeat(maxRetries) { attempt ->
+            try {
+                val result = providerHandler.generateText(
+                    providerSetting = provider,
+                    messages = listOf(
+                        UIMessage.user(
+                            prompt = settings.summaryPrompt.applyPlaceholders(
+                                "content" to message.toText()
+                            )
+                        ),
+                    ),
+                    params = TextGenerationParams(
+                        model = model,
+                        reasoningLevel = ReasoningLevel.OFF,
+                    ),
+                )
+                val summaryText = result.choices[0].message?.toText()?.trim()
+                if (summaryText.isNullOrBlank()) return null
+                return message.id to summaryText
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                if (attempt < maxRetries - 1) {
+                    delay(1000L * (attempt + 1)) // 指数退避
+                    Log.w(TAG, "Summary generation failed for message ${message.id}, retrying (${attempt + 1}/$maxRetries)", e)
                 } else {
-                    node
+                    Log.e(TAG, "Summary generation failed for message ${message.id} after $maxRetries attempts", e)
+                    // 不抛出异常，返回 null 表示该消息失败
+                    return null
                 }
             }
-
-            saveConversation(conversationId, latestConversation.copy(messageNodes = updatedNodes))
-        }.onFailure {
-            it.printStackTrace()
-            addError(
-                error = it,
-                conversationId = conversationId,
-                title = context.getString(R.string.error_title_generate_summary),
-            )
         }
+        return null
     }
 
     // ---- 通知 ----

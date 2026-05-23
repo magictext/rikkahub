@@ -436,10 +436,10 @@ private fun ChatPageContent(
                     vm.saveConversationAsync()
                 },
                 onGenerateSummary = { node ->
-                    vm.handleGenerateMessageSummary(node.id)
+                    vm.handleGenerateMessageSummary(node.currentMessage.id)
                 },
                 onRemoveSummary = { node ->
-                    vm.handleRemoveMessageSummary(node.id)
+                    vm.handleRemoveMessageSummary(node.currentMessage.id)
                 },
             )
         }

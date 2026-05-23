@@ -203,9 +203,7 @@ class ChatVM(
     }
 
     fun handleGenerateMessageSummary(messageId: Uuid) {
-        viewModelScope.launch {
-            chatService.generateMessageSummary(_conversationId, messageId)
-        }
+        chatService.generateMessageSummary(_conversationId, messageId)
     }
 
     fun handleRemoveMessageSummary(messageId: Uuid) {
@@ -215,9 +213,7 @@ class ChatVM(
     }
 
     fun handleBatchGenerateSummaries() {
-        viewModelScope.launch {
-            chatService.batchGenerateSummaries(_conversationId, conversation.value)
-        }
+        chatService.batchGenerateSummaries(_conversationId, conversation.value)
     }
 
     suspend fun forkMessage(message: UIMessage): Conversation {
